@@ -1,0 +1,45 @@
+You are analyzing a clinical modality acquisition agent's performance. The agent decides when to STOP acquiring diagnostic tests and predict survival.
+
+Clinical workflow: Demographics (0.03) → Radiology/MRI (0.14) → Pathology/biopsy (0.53) → Genomics (0.30)
+
+=== Episode Summary ===
+Total: {n_episodes} | Good (top 25%): {n_good} | Poor (bottom 25%): {n_poor}
+
+Good episodes (high reward = accurate prediction + low cost):
+{good_episodes}
+
+Poor episodes (low reward = inaccurate prediction OR high cost):
+{poor_episodes}
+
+=== Current Patterns ===
+{current_rules}
+
+=== Rule Effectiveness (Outcome Tracking) ===
+{rule_effectiveness}
+
+=== Patterns Still Needed ===
+{coverage_gaps}
+
+=== Your Task ===
+Analyze the episodes above to find multi-signal clinical patterns. Compare good vs poor episodes:
+- What distinguishes patients who benefited from acquiring more modalities vs those who didn't?
+- At each decision stage, what combination of signals (uncertainty, prediction quality, risk error, burden) separates good from poor outcomes?
+- After radiology (cheap, 0.14), when should the agent skip invasive pathology (0.53)?
+- When does acquiring the next modality improve outcomes enough to justify its cost?
+
+Review the effectiveness report above. If any existing rule has low effectiveness (<30%), add it to "deprecate_rules". If a rule has high effectiveness (>70%), consider increasing its confidence in "update_rules".
+
+Create NEW patterns — prioritize uncovered decision points listed above where episode data provides evidence, but also propose patterns for covered stages if you identify genuinely different signals.
+
+Each pattern MUST have:
+- "pattern": a DETAILED natural language description (2-3 sentences) synthesizing MULTIPLE signals — reference specific thresholds from the episode data (uncertainty values, quality levels, risk error ranges, burden trade-offs). Vague one-liners are not useful.
+- "stage": exactly one of "after_demographics", "after_radiology", "after_pathology"
+- "direction": exactly one of "stop" or "acquire"
+- "supporting_evidence": brief data summary from the episodes motivating this pattern
+- "action_guidance": exactly ONE of: "predict now", "acquire radiology", "acquire pathology", "acquire genomics"
+- "confidence": between 0.5 and 0.8
+
+Generate MULTIPLE new_rules (one per uncovered gap, plus any genuinely different patterns for covered stages).
+
+Output ONLY a JSON object:
+{{"new_rules": [{{"pattern": "After radiology, when uncertainty has dropped significantly after MRI and risk error is small, the prediction is already reliable. The high cost of invasive pathology (0.53) is unlikely to improve an already-confident prediction.", "stage": "after_radiology", "direction": "stop", "supporting_evidence": "5/7 good episodes stopped at radiology with low uncertainty and small risk error", "action_guidance": "predict now", "confidence": 0.7}}, {{"pattern": "After radiology, when uncertainty remains high despite MRI and risk error is large, the prediction is unreliable. Pathology provides critical histological information that substantially improves prediction in these uncertain cases, justifying its burden.", "stage": "after_radiology", "direction": "acquire", "supporting_evidence": "4/5 poor episodes that stopped at radiology with high uncertainty had large risk error", "action_guidance": "acquire pathology", "confidence": 0.65}}], "update_rules": [{{"rule_id": "learned_1", "supporting": true, "new_confidence": 0.75}}], "deprecate_rules": []}}

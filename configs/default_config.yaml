@@ -1,0 +1,161 @@
+# SAGEAgent: Default Configuration
+# Phase 0 — Survival Predictor Pre-training
+# Phase 1 — Clinical Modality Acquisition Agent
+
+# =============================================================================
+# Data Settings
+# =============================================================================
+data:
+  # IMPORTANT: Update data_root to your local project directory before running.
+  # Set this to your project root directory
+  data_root: "./"
+  features_file: "features_32d/patches_1212_gbmlgg15cv_32_all.pkl"
+  feature_dim: 32
+  n_modalities: 4
+  modality_names: ["demographics", "radiology", "pathology", "genomics"]
+  # maps modality name -> pkl array key in the pkl file
+  modality_keys:
+    demographics: "x_demo"
+    radiology: "x_rad"
+    pathology: "x_path_fea"
+    genomics: "x_omic"
+
+  # Original 15-fold CV in source pkl (used by Phase 0 training)
+  n_folds: 15
+  test_fold: 1
+  val_fold: 2
+
+# =============================================================================
+# Paths (relative to data_root)
+# =============================================================================
+paths:
+  # Nested 5x5 CV splits (created by create_nested_splits.py)
+  splits_dir: "splits"
+  # Phase 0 predictor checkpoints (nested 5x5: outer_N/inner_M/)
+  predictor_checkpoint_dir: "checkpoints/nested5x5"
+  # Calibrated uncertainty heads (same structure: outer_N/inner_M/calibrated_head.pt)
+
+# =============================================================================
+# Clinical Burden (patient invasiveness / QoL impact, Phase 1)
+#   - Demographics:  routine history, minimal burden
+#   - Radiology:     MRI scan, non-invasive but time/contrast
+#   - Pathology:     biopsy/resection, invasive surgical procedure
+#   - Genomics:      NGS panel, ~$3K, 14-day turnaround, specialized lab
+# MCDA-derived
+# =============================================================================
+clinical_burden:
+  demographics: 0.03
+  radiology: 0.14
+  pathology: 0.53
+  genomics: 0.30
+
+# =============================================================================
+# Model Architecture
+# =============================================================================
+model:
+  encoder:
+    hidden_dim: 128
+    n_layers: 2
+    n_heads: 4
+    dropout: 0.1
+    use_positional: true
+
+  survival:
+    hidden_dims: [64, 32]
+    dropout: 0.3
+    use_reconstruction: true     # auxiliary reconstruction heads
+
+# =============================================================================
+# Training — Phase 0 Survival Pre-training
+# =============================================================================
+training:
+  seed: 42
+  device: "cuda"
+  num_workers: 4
+
+  survival:
+    n_epochs: 150
+    batch_size: 32
+    lr: 0.0002
+    weight_decay: 0.0001
+    patience: 30
+    mask_augment_prob: 0.5       # modality dropout probability
+    min_epochs: 20            # minimum epochs before early stopping starts
+    recon_weight: 1.0         # weight for reconstruction loss
+    align_weight: 0.1         # weight for cross-modal alignment loss
+    warmup_epochs: 5          # linear warmup epochs for LR scheduler
+    min_lr: 0.000001          # minimum LR for cosine annealing
+    n_intervals: 4             # discrete time intervals for NLL survival loss
+    nll_alpha: 0.0            # NLL weight: 0=Cox only, 0.3=auxiliary NLL
+
+# =============================================================================
+# Phase 1 — Clinical Environment
+# =============================================================================
+environment:
+  budget: 1.0                     # max total clinical burden per episode
+  reward_coeff: 1.0               # weight for prediction quality in terminal reward
+  max_steps: 10                   # hard cap on steps per episode
+
+  # Clinical dependency chain: Demo -> Rad -> Path -> Gen
+  # Always enforced (strict clinical ordering)
+  dependency_chain: ["demographics", "radiology", "pathology", "genomics"]
+
+# =============================================================================
+# Phase 1 — LLM Agent
+# =============================================================================
+agent:
+  model_name: "Qwen/Qwen2.5-7B-Instruct"
+  max_new_tokens: 512
+  temperature: 0.3
+  n_retrieval: 3                  # similar patients to retrieve
+  use_tools: true
+  use_episodic: true
+  use_semantic: true
+  reflect_every: 20               # self-reflection every N patients
+
+  memory:
+    episodic_max_episodes: 5000
+    embedding_dim: 128
+
+# =============================================================================
+# Phase 1 — RL Baselines
+# =============================================================================
+rl:
+  dqn:
+    n_episodes: 10000
+    lr: 0.001
+    gamma: 0.99
+    epsilon_start: 1.0
+    epsilon_end: 0.05
+    epsilon_decay: 5000
+    buffer_size: 10000
+    batch_size: 64
+    tau: 0.005
+
+  ppo:
+    n_episodes: 10000
+    lr: 0.0003
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_eps: 0.2
+    n_epochs: 4
+    batch_size: 64
+    update_every: 128
+    ent_coeff: 0.01
+
+# =============================================================================
+# Phase 1 — Evaluation (Nested 5x5 CV)
+# =============================================================================
+evaluation:
+  n_outer: 5                      # outer folds for nested CV
+  n_inner: 5                      # inner folds per outer fold
+  n_bootstrap: 1000               # bootstrap resamples for CI
+
+# =============================================================================
+# Logging
+# =============================================================================
+logging:
+  log_dir: "logs"
+  checkpoint_dir: "checkpoints"
+  debug: false
+  print_every: 1
