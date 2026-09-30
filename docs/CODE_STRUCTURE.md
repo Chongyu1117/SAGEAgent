@@ -46,7 +46,7 @@ SAGEAgent/
 ## How the pieces fit together
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph P["Frozen models (steps 1–2)"]
         PR["Survival predictor<br/>models/predictor.py"] -->|"e_t, r_t"| UH["Uncertainty head<br/>models/uncertainty.py"]
     end

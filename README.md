@@ -15,9 +15,8 @@
 
 <div align="center">
   <a href="https://arxiv.org/abs/2607.09521"><img src="https://img.shields.io/badge/arXiv-2607.09521-b31b1b.svg?logo=arxiv&logoColor=white" alt="arXiv"></a>
-  <img src="https://img.shields.io/badge/MICCAI-2026-1f6feb.svg" alt="MICCAI 2026">
+  <a href="https://link.springer.com/chapter/10.1007/978-3-032-38059-3_51"><img src="https://img.shields.io/badge/MICCAI-2026-1f6feb.svg" alt="MICCAI 2026"></a>
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?logo=python&logoColor=white" alt="Python 3.10+">
-  <img src="https://img.shields.io/badge/PyTorch-2.x-EE4C2C.svg?logo=pytorch&logoColor=white" alt="PyTorch 2.x">
   <a href="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct"><img src="https://img.shields.io/badge/LLM-Qwen2.5--7B--Instruct%20(frozen)-615CED.svg" alt="Qwen2.5-7B-Instruct"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0"></a>
   <a href="https://github.com/Chongyu1117/SAGEAgent/stargazers"><img src="https://img.shields.io/github/stars/Chongyu1117/SAGEAgent?style=social" alt="GitHub stars"></a>
@@ -132,10 +131,12 @@ If you find SAGEAgent useful for your research, please cite:
 
 ```bibtex
 @inproceedings{qu2026sageagent,
-  title     = {SAGEAgent: A Self-Evolving Agent for Cost-Aware Modality Acquisition in Multimodal Survival Prediction},
-  author    = {Qu, Chongyu and Cui, Can and Lu, Zhengyi and Zhu, Junchao and Yao, Tianyuan and Guo, Junlin and Xiong, Juming and Zhu, Yanfan and Yang, Yuechen and Landman, Bennett A. and Huo, Yuankai},
-  booktitle = {Medical Image Computing and Computer Assisted Intervention (MICCAI)},
-  year      = {2026}
+  title={SAGEAgent: A Self-evolving Agent for Cost-Aware Modality Acquisition in Multimodal Survival Prediction},
+  author={Qu, Chongyu and Cui, Can and Lu, Zhengyi and Zhu, Junchao and Yao, Tianyuan and Guo, Junlin and Xiong, Juming and Zhu, Yanfan and Yang, Yuechen and Landman, Bennett A and others},
+  booktitle={International Conference on Medical Image Computing and Computer-Assisted Intervention},
+  pages={536--546},
+  year={2026},
+  organization={Springer}
 }
 ```
 
