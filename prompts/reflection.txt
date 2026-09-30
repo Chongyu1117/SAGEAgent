@@ -1,0 +1,34 @@
+You are reviewing the recent decisions of a clinical agent for {disease} patients. At each stage of a fixed diagnostic order the agent either acquires the next modality or stops and predicts survival. Each episode's total reward is higher when the final prediction is confident and the clinical burden is low.
+
+Clinical order (burden): {pathway}
+
+=== Episodes in this reflection cycle ===
+{n_episodes} episodes; good = top quartile of total reward ({n_good}), poor = bottom quartile ({n_poor}).
+Risk error = |final risk - risk with the full workup|; uncertainty is listed for every stage the episode visited.
+
+Good episodes:
+{good_episodes}
+
+Poor episodes:
+{poor_episodes}
+
+=== Current rules and their effectiveness ===
+Effectiveness = share of rule-following episodes that were good (random baseline: {baseline:.2f}).
+{rule_report}
+
+=== Decision points without a rule ===
+{uncovered}
+
+=== Task ===
+Compare the good and poor episodes and write decision rules that explain the difference. Each rule should combine several signals (stage, uncertainty, risk error, burden) and cite thresholds observed in the episodes above. You may also adjust the confidence of existing rules or deprecate rules that lead to poor outcomes.
+
+Each new rule needs:
+- "pattern": 2-3 sentences describing when the rule applies and why
+- "stage": one of {stages}
+- "direction": "stop" or "acquire"
+- "action_guidance": "predict now" for stop rules, or "acquire <next modality>" for acquire rules, i.e. one of {guidance}
+- "supporting_evidence": a short summary of the episodes that support the rule
+- "confidence": a number between 0.5 and 0.8
+
+Answer with one JSON object and nothing else, following this schema:
+{{"new_rules": [{{"pattern": "<text>", "stage": "<stage>", "direction": "<stop|acquire>", "action_guidance": "<guidance>", "supporting_evidence": "<text>", "confidence": <number>}}], "update_rules": [{{"rule_id": "<id>", "new_confidence": <number>}}], "deprecate_rules": ["<id>"]}}

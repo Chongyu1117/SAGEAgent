@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 190" width="900" height="190" role="img" aria-label="SAGEAgent">
+<title>SAGEAgent</title>
+<style>text{font-family:Helvetica, Arial, 'Liberation Sans', sans-serif}</style>
+<g transform="translate(10,5)"><line x1="30" y1="58" x2="88" y2="58" stroke="#097c7c" stroke-width="7" stroke-linecap="round"/><line x1="105" y1="58" x2="189" y2="58" stroke="#a8a8a8" stroke-width="6" stroke-dasharray="11 8"/><circle cx="30" cy="58" r="13" fill="#097c7c"/><circle cx="88" cy="58" r="13" fill="#097c7c"/><circle cx="146" cy="58" r="12" fill="#ffffff" stroke="#a8a8a8" stroke-width="4" stroke-dasharray="4 4"/><circle cx="204" cy="58" r="12" fill="#ffffff" stroke="#a8a8a8" stroke-width="4" stroke-dasharray="4 4"/><line x1="30" y1="132" x2="204" y2="132" stroke="#ea4d1d" stroke-width="7" stroke-linecap="round"/><circle cx="30" cy="132" r="13" fill="#ea4d1d"/><circle cx="88" cy="132" r="13" fill="#ea4d1d"/><circle cx="146" cy="132" r="13" fill="#ea4d1d"/><circle cx="204" cy="132" r="13" fill="#ea4d1d"/></g>
+<text x="266" y="112" font-size="98" font-weight="700" letter-spacing="-1.5" fill="#097c7c">SAGE<tspan fill="#1f2328">Agent</tspan></text>
+<text x="270" y="158" font-size="25.5" fill="#59636e" letter-spacing=".6"><tspan font-weight="700" fill="#1f2328">S</tspan>equential <tspan font-weight="700" fill="#1f2328">A</tspan>cquisition <tspan font-weight="700" fill="#1f2328">G</tspan>uided by <tspan font-weight="700" fill="#1f2328">E</tspan>xperience</text>
+</svg>

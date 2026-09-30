@@ -1,0 +1,147 @@
+# =============================================================================
+# SAGEAgent — glioma cohort (TCGA-LGG, TCGA-GBM, BraTS)
+#
+# Every script reads this file. Relative paths are resolved against the
+# repository root. Any value can be overridden from the command line, e.g.
+#   python run_agent.py --config configs/glioma.yaml --set agent.temperature=0.3
+# =============================================================================
+
+experiment:
+  output_dir: outputs/glioma   # checkpoints, agent memory and evaluation results
+  seed: 42
+
+data:
+  cohort: embedding/glioma/cohort.npz    # pre-extracted features and survival (scripts/prepare_glioma.py)
+  splits: embedding/glioma/splits.json   # nested cross-validation splits of the paper (scripts/make_splits.py)
+
+# -----------------------------------------------------------------------------
+# Clinical pathway: modalities in their clinically mandated acquisition order.
+# `burden` is the clinical burden b(m) in [0, 1]; the labels and descriptions
+# are what the LLM sees in its prompts.
+# -----------------------------------------------------------------------------
+clinical:
+  disease: glioma (brain cancer)
+  initial_modalities: 1          # modalities available before the first decision
+  modalities:
+    - name: demographics
+      label: Demographics
+      description: routine clinical history collected at intake
+      burden: 0.03
+    - name: radiology
+      label: Radiology (MRI)
+      description: non-invasive imaging
+      burden: 0.14
+    - name: pathology
+      label: Pathology (biopsy)
+      description: invasive surgical procedure
+      burden: 0.53
+    - name: genomics
+      label: Genomics (sequencing)
+      description: molecular profiling of the tissue sample, expensive and slow
+      burden: 0.30
+
+cv:
+  n_outer: 5     # outer folds over complete-modality patients (evaluation)
+  n_inner: 5     # inner folds per outer fold (one pipeline each)
+
+# -----------------------------------------------------------------------------
+# Multimodal survival predictor (frozen during agent operation)
+# -----------------------------------------------------------------------------
+predictor:
+  hidden_dim: 128
+  n_layers: 2
+  n_heads: 4
+  ffn_mult: 4
+  dropout: 0.1
+  head_hidden_dims: [64, 32]
+  head_dropout: 0.3
+  reconstruction: true
+  train:
+    epochs: 150
+    batch_size: 32
+    lr: 2.0e-4
+    weight_decay: 1.0e-4
+    warmup_epochs: 5
+    min_lr: 1.0e-6
+    grad_clip: 1.0
+    modality_dropout: 0.5        # probability of dropping each present modality
+    recon_weight: 1.0
+    align_weight: 0.1
+    min_epochs: 20               # model selection on validation C-index starts here
+    patience: 30
+
+# -----------------------------------------------------------------------------
+# Calibrated uncertainty head: u_t = sigmoid(f([e_t, a_t]) / T)
+# Label = 1 if |r_t - r_full| > tau on clinical-order prefix masks.
+# -----------------------------------------------------------------------------
+uncertainty:
+  tau: 0.3
+  hidden_dim: 64
+  min_modalities: null           # null: complete-modality patients only
+  train:
+    epochs: 100
+    batch_size: 128
+    lr: 1.0e-3
+    weight_decay: 1.0e-4
+    patience: 15
+
+# -----------------------------------------------------------------------------
+# Stage and terminal rewards
+#   acquire m_{t+1}:  R_stage = -b(m_{t+1}) + alpha * max(0, u_t - u_{t+1})
+#   stop at t:        R_term  = (1 - u_t) - lambda * B_t
+# -----------------------------------------------------------------------------
+reward:
+  alpha: 1.0
+  lambda: 1.0
+
+# -----------------------------------------------------------------------------
+# SAGEAgent (frozen LLM + clinical tools + episodic and semantic memory)
+# -----------------------------------------------------------------------------
+agent:
+  llm: Qwen/Qwen2.5-7B-Instruct
+  dtype: bfloat16
+  temperature: 0.6
+  top_p: 0.9
+  max_new_tokens: 512
+  min_new_tokens: 0
+  batch_size: 8                  # prompts generated together during evaluation
+  prompts:
+    decision: prompts/decision.txt
+    reflection: prompts/reflection.txt
+  components:                    # ablations switch these off
+    tools: true
+    episodic: true
+    semantic: true
+  tools:
+    uncertainty_levels: [very low, low, moderate, high, very high]   # training quantiles
+    risk_levels: [below average, around average, above average]      # training quantiles
+  episodic:
+    k: 3                         # retrieved training patients and past episodes
+    reward_weight: 1.0           # re-ranking score = similarity + weight * normalized reward
+    candidates: 30               # similarity candidates before stage matching
+
+# Experience accumulation (run_agent.py)
+experience:
+  episodes_per_patient: 3        # first episode starts after the initial modalities,
+                                 # later ones start at a random earlier stage
+  reflect_every: 10              # patients per reflection cycle
+
+# Semantic memory and self-reflection
+semantic:
+  max_active_rules: 10
+  max_rules_per_stage_direction: 2
+  good_quantile: 0.75            # episodes ranked by total reward: top quartile = good
+  poor_quantile: 0.25            #                                 bottom quartile = poor
+  min_support: 5                 # followed episodes before a rule is judged
+  deprecate_poor_rate: 0.5       # deprecate if this share of followed episodes is poor
+  novelty_threshold: 0.95        # reject a rule this similar to an existing one
+  reflection:
+    temperature: 0.3
+    top_p: 0.9
+    max_new_tokens: 1024
+    max_examples: 10             # good / poor episodes shown per reflection
+    max_attempts: 3              # re-generate when the answer is not valid JSON
+
+evaluation:
+  n_bootstrap: 1000              # stratified within outer folds
+  save_traces: true              # full chain-of-thought for every test patient
