@@ -1,6 +1,6 @@
 # Getting Started
 
-[← Back to README](../README.md) · [Code structure](CODE_STRUCTURE.md)
+[← Back to README](../README.md) · [Code structure](CODE_STRUCTURE.md) · [Clinical burden](CLINICAL_BURDEN.md)
 
 - [Installation](#installation)
 - [Data](#data)
@@ -61,7 +61,7 @@ Outer folds split the patients with every modality; each outer test set is part 
 ### Your own dataset
 
 1. Write a cohort file in the format above.
-2. Copy [`configs/glioma.yaml`](../configs/glioma.yaml) and edit the `clinical` section: disease, the modalities in their clinical order, a short description and a burden for each. These texts are what the LLM sees.
+2. Copy [`configs/glioma.yaml`](../configs/glioma.yaml) and edit the `clinical` section: disease, the modalities in their clinical order, a short description and a burden for each ([deriving burdens](CLINICAL_BURDEN.md#recompute-or-adapt)). These texts are what the LLM sees.
 3. Point `data.cohort` and `data.splits` to your files, run `python scripts/make_splits.py --config <your config>`, then run the pipeline below.
 
 ## Pipeline
@@ -160,6 +160,6 @@ python run_agent.py --config configs/glioma.yaml --set agent.temperature=0.3 exp
 | Cross-validation | nested 5×5: 5 outer folds (136 / 34 complete patients), 5 inner folds each, giving 25 pipelines |
 | Aggregation | per patient, a modality is acquired if a majority (≥ 3 of 5) of the inner pipelines acquire it |
 | C-index | risk under the voted modalities, averaged over the 5 inner predictors; one C-index per outer fold, mean ± std over folds |
-| Burden | demographics 0.03, radiology 0.14, pathology 0.53, genomics 0.30 (full workup = 1.00), derived by multi-criteria decision analysis of cost, turnaround time, invasiveness and infrastructure |
+| Burden | demographics 0.03, radiology 0.14, pathology 0.53, genomics 0.30 (full workup = 1.00), derived by multi-criteria decision analysis of cost, turnaround time, invasiveness and infrastructure ([details](CLINICAL_BURDEN.md)) |
 | Trade-off | hypervolume HV = (C-index − 0.5) × (1 − burden) |
 | Intervals | 95% percentile bootstrap, 1,000 resamples drawn within each outer fold |

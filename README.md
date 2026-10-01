@@ -96,7 +96,7 @@ The LLM reasons step by step and outputs `ACQUIRE` or `PREDICT`. All adaptation 
   </tbody>
 </table>
 
-<sub>Results as reported in the paper. Glioma cohort, 170 complete-modality patients, nested 5×5 cross-validation. Values are the mean over the 5 outer folds with 95% bootstrap confidence intervals (1,000 stratified resamples). Burden per modality: demographics 0.03, radiology 0.14, pathology 0.53, genomics 0.30 (full workup = 1.00). **D / R / P / G** = number of the 170 patients for whom demographics / radiology / pathology / genomics was acquired. <sup>†</sup> The predictor backbone used by SAGEAgent.</sub>
+<sub>Results as reported in the paper. Glioma cohort, 170 complete-modality patients, nested 5×5 cross-validation. Values are the mean over the 5 outer folds with 95% bootstrap confidence intervals (1,000 stratified resamples). Burden per modality: demographics 0.03, radiology 0.14, pathology 0.53, genomics 0.30 (full workup = 1.00; [how they were derived](docs/CLINICAL_BURDEN.md)). **D / R / P / G** = number of the 170 patients for whom demographics / radiology / pathology / genomics was acquired. <sup>†</sup> The predictor backbone used by SAGEAgent.</sub>
 
 <details>
 <summary><b>Component ablation</b> (each row adds one component to the base LLM)</summary>
@@ -123,6 +123,7 @@ The LLM reasons step by step and outputs `ACQUIRE` or `PREDICT`. All adaptation 
 - 📜 [Evaluating with the released rules](docs/GETTING_STARTED.md#released-rules)
 - 🧪 [Ablations](docs/GETTING_STARTED.md#ablations)
 - ⚙️ [Configuration](docs/GETTING_STARTED.md#configuration)
+- ⚖️ [Clinical burden of each modality](docs/CLINICAL_BURDEN.md)
 - 🧱 [Code structure](docs/CODE_STRUCTURE.md)
 
 ## Citation

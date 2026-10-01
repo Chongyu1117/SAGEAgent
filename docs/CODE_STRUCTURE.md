@@ -1,6 +1,6 @@
 # Code Structure
 
-[← Back to README](../README.md) · [Getting started](GETTING_STARTED.md)
+[← Back to README](../README.md) · [Getting started](GETTING_STARTED.md) · [Clinical burden](CLINICAL_BURDEN.md)
 
 ```
 SAGEAgent/

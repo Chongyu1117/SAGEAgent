@@ -16,7 +16,8 @@ data:
 
 # -----------------------------------------------------------------------------
 # Clinical pathway: modalities in their clinically mandated acquisition order.
-# `burden` is the clinical burden b(m) in [0, 1]; the labels and descriptions
+# `burden` is the clinical burden b(m) in [0, 1] (derived by multi-criteria
+# decision analysis, see docs/CLINICAL_BURDEN.md); the labels and descriptions
 # are what the LLM sees in its prompts.
 # -----------------------------------------------------------------------------
 clinical:
